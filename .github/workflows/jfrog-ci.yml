@@ -22,17 +22,19 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 1. Use a stable older version of the setup action
+      # 1. Use v4 of the action and force it to install the LATEST CLI version
       - name: Setup JFrog CLI
-        uses: jfrog/setup-jfrog-cli@v3 # Using v3 instead of v4
+        uses: jfrog/setup-jfrog-cli@v4
+        with:
+          version: latest # This is the key change
 
-      # 2. Add an EXPLICIT server configuration step
+      # 2. Add the explicit server configuration step (this will now work)
       - name: Configure JFrog Server
         run: |
           jf c add temp-server --url=$JFROG_URL --oidc-provider-name=$JFROG_OIDC_PROVIDER_NAME --oidc-audience=$JFROG_OIDC_AUDIENCE
           jf c use temp-server
 
-      # 3. The debug step to verify the configuration
+      # 3. Debug step to verify
       - name: Show JFrog CLI Config
         run: jf c show
 
