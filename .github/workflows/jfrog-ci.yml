@@ -1,0 +1,34 @@
+name: JFrog CI Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    # 1. Grant permissions for the job to fetch an OIDC token
+    permissions:
+      id-token: write
+      contents: read
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Setup JFrog CLI with OIDC credentials
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v4
+        env:
+          JFROG_URL: "https://andrewrjpd1.jfrog.io" # Stored in GitHub secrets
+          JFROG_OIDC_PROVIDER_NAME: "github" # The provider name from JFrog UI
+          JFROG_OIDC_AUDIENCE: "jfrog" # The audience from JFrog UI
+
+      # 3. Use the authenticated CLI to upload a file
+      - name: Upload Artifact to Artifactory
+        run: |
+          echo "Hello from GitHub Actions!" > my-file.txt
+          jf rt u "my-file.txt" "my-generic-repo/"
+          echo "Upload complete!"
