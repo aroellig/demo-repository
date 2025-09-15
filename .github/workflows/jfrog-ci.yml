@@ -15,30 +15,24 @@ jobs:
 
     env:
       JFROG_URL: "https://andrewrjpd1.jfrog.io"
-      JFROG_OIDC_PROVIDER_NAME: "github"
-      JFROG_OIDC_AUDIENCE: "jfrog"
+      JFROG_OIDC_PROVIDER_NAME: "github" # Must match the provider name in JFrog UI
+      JFROG_OIDC_AUDIENCE: "jfrog"      # Must match the audience in JFrog UI
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 1. Use v4 of the action and force it to install the LATEST CLI version
+      # The setup action will now read the env vars and handle the entire OIDC exchange
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
         with:
-          version: latest # This is the key change
+          version: latest
 
-      # 2. Add the explicit server configuration step (this will now work)
-      - name: Configure JFrog Server
-        run: |
-          jf c add temp-server --url=$JFROG_URL --oidc-provider-name=$JFROG_OIDC_PROVIDER_NAME --oidc-audience=$JFROG_OIDC_AUDIENCE
-          jf c use temp-server
-
-      # 3. Debug step to verify
+      # The debug step to verify the action worked
       - name: Show JFrog CLI Config
         run: jf c show
 
-      # 4. Upload the artifact
+      # The upload step
       - name: Upload Artifact to Artifactory
         run: |
           echo "Hello from GitHub Actions!" > my-file.txt
