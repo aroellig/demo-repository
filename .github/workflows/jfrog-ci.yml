@@ -22,9 +22,13 @@ jobs:
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
         env:
-          JFROG_URL: "https://andrewrjpd1.jfrog.io" # Stored in GitHub secrets
-          JFROG_OIDC_PROVIDER_NAME: "github" # The provider name from JFrog UI
-          JFROG_OIDC_AUDIENCE: "jfrog" # The audience from JFrog UI
+          JFROG_URL: "https://andrewrjpd1.jfrog.io"
+          JFROG_OIDC_PROVIDER_NAME: "github"
+          JFROG_OIDC_AUDIENCE: "jfrog"
+
+      # *** NEW DEBUGGING STEP ***
+      - name: Show JFrog CLI Config
+        run: jf c show
 
       # 3. Use the authenticated CLI to upload a file
       - name: Upload Artifact to Artifactory
