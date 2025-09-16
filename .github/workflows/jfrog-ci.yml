@@ -1,4 +1,4 @@
-name: JFrog CI Workflow
+name: JFrog CI Workflow (Username/Password Auth)
 
 on:
   push:
@@ -8,31 +8,30 @@ on:
 jobs:
   build-and-deploy:
     permissions:
-      id-token: write
       contents: read
 
     runs-on: ubuntu-latest
-
-    env:
-      JF_URL: "https://andrewrjpd1.jfrog.io"
-      JFROG_OIDC_PROVIDER_NAME: "github" # Must match the provider name in JFrog UI
-      JFROG_OIDC_AUDIENCE: "jfrog"      # Must match the audience in JFrog UI
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # The setup action will now read the env vars and handle the entire OIDC exchange
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
         with:
           version: latest
 
-      # The debug step to verify the action worked
+      # Configure JFrog CLI with your hardcoded credentials
+      - name: Configure JFrog Server
+        run: |
+          jf c add temp-server --url="https'://andrewrjpd1.jfrog.io" --user="andrewr@jfrog.com" --password="BigCountry1!" --overwrite
+          jf c use temp-server
+        
+      # Debug step to verify the configuration
       - name: Show JFrog CLI Config
         run: jf c show
 
-      # The upload step
+      # Upload the artifact
       - name: Upload Artifact to Artifactory
         run: |
           echo "Hello from GitHub Actions!" > my-file.txt
