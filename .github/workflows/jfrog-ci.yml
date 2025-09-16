@@ -24,7 +24,7 @@ jobs:
       # Configure JFrog CLI with your hardcoded credentials
       - name: Configure JFrog Server
         run: |
-          jf c add temp-server --url="https://andrewrjpd1.jfrog.io" --user="andrewr@jfrog.com" --password="BigCountry1!" --overwrite
+          jf c add temp-server --artifactory-url="https://andrewrjpd1.jfrog.io" --user="andrewr@jfrog.com" --password="BigCountry1!" --overwrite
           jf c use temp-server
         
       # Debug step to verify the configuration
