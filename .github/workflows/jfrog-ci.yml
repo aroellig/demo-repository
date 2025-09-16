@@ -1,39 +1,26 @@
-name: JFrog CI Workflow
+name: "Setup JFrog CLI OIDC Example"
+on: push
 
-on:
-  push:
-    branches:
-      - main
 
+permissions:
+  # This is required for requesting the OIDC token
+  id-token: write
+  # This is required for actions/checkout
+  contents: read
 jobs:
-  build-and-deploy:
-    permissions:
-      id-token: write
-      contents: read
-
+  build:
     runs-on: ubuntu-latest
-
-    env:
-      JF_URL: "https://andrewrjpd1.jfrog.io"
-      JFROG_OIDC_PROVIDER_NAME: "github" # Must match the provider name in JFrog UI
-
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
-
-      # The setup action will now read the env vars and handle the entire OIDC exchange
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
+        env:
+          JF_URL: "https://andrewrjpd1.jfrog.io"
         with:
-          version: latest
+          oidc-provider-name: github
 
-      # The debug step to verify the action worked
-      - name: Show JFrog CLI Config
-        run: jf c show
-
-      # The upload step
-      - name: Upload Artifact to Artifactory
+      - name: Run JFrog CLI
         run: |
-          echo "Hello from GitHub Actions!" > my-file.txt
-          jf rt u "my-file.txt" "my-generic-repo/"
-          echo "Upload complete!"
+          # Ping the server
+          jf rt ping
