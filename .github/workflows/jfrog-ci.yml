@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      JFROG_URL: "https://andrewrjpd1.jfrog.io"
+      JF_URL: "https://andrewrjpd1.jfrog.io"
       JFROG_OIDC_PROVIDER_NAME: "github" # Must match the provider name in JFrog UI
       JFROG_OIDC_AUDIENCE: "jfrog"      # Must match the audience in JFrog UI
 
