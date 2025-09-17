@@ -1,36 +1,38 @@
-name: "Setup JFrog CLI OIDC Example"
+name: "Build and Push Docker Image with JFrog CLI"
 on: push
 
-
 permissions:
-  # This is required for requesting the OIDC token
   id-token: write
-  # This is required for actions/checkout
   contents: read
+
 jobs:
-  build:
+  build-and-push-docker:
     runs-on: ubuntu-latest
+    # Define environment variables at the job level here
+    env:
+      JF_URL: "https://andrewrjpd1.jfrog.io"
+      # Replace 'my-docker-repo' with your Artifactory Docker repository name
+      ARTIFACTORY_DOCKER_REPO: "docker-local"
+      # Replace 'my-app' with your desired image name
+      IMAGE_NAME: "my-app"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
-        env:
-          JF_URL: "https://andrewrjpd1.jfrog.io"
+        # The JF_URL is now inherited from the job's env context
         with:
           oidc-provider-name: github
 
       - name: Build and Push Docker Image
         run: |
-          # Define your repository and image names
-          # Replace 'my-docker-repo' with your Artifactory Docker repository name
-          # Replace 'my-app' with your desired image name
-          ARTIFACTORY_DOCKER_REPO="docker-local"
-          IMAGE_NAME="my-app"
+          # Define the image tag
           IMAGE_TAG="1.0.${{ github.run_number }}"
 
-          # Construct the full image path for Artifactory
-          # This is typically <JFROG_URL_HOSTNAME>/<REPO_NAME>/<IMAGE_NAME>:<TAG>
+          # Construct the full image path using the hostname from JF_URL
+          # The shell command '${JF_URL#*//}' strips the 'https://' prefix
           ARTIFACTORY_IMAGE_PATH="${JF_URL#*//}/${ARTIFACTORY_DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
 
           echo "Building and pushing image to: ${ARTIFACTORY_IMAGE_PATH}"
@@ -38,5 +40,5 @@ jobs:
           # Build the Docker image
           docker build -t "${ARTIFACTORY_IMAGE_PATH}" .
 
-          # The JFrog CLI uses the OIDC token to automatically configure Docker credentials
+          # Push the image to Artifactory
           jf rt docker-push "${ARTIFACTORY_IMAGE_PATH}" "${ARTIFACTORY_DOCKER_REPO}"
