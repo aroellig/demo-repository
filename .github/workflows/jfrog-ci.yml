@@ -20,7 +20,23 @@ jobs:
         with:
           oidc-provider-name: github
 
-      - name: Run JFrog CLI
+      - name: Build and Push Docker Image
         run: |
-          # Ping the server
-          jf rt ping
+          # Define your repository and image names
+          # Replace 'my-docker-repo' with your Artifactory Docker repository name
+          # Replace 'my-app' with your desired image name
+          ARTIFACTORY_DOCKER_REPO="my-docker-repo"
+          IMAGE_NAME="my-app"
+          IMAGE_TAG="1.0.${{ github.run_number }}"
+
+          # Construct the full image path for Artifactory
+          # This is typically <JFROG_URL_HOSTNAME>/<REPO_NAME>/<IMAGE_NAME>:<TAG>
+          ARTIFACTORY_IMAGE_PATH="${JF_URL#*//}/${ARTIFACTORY_DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
+
+          echo "Building and pushing image to: ${ARTIFACTORY_IMAGE_PATH}"
+
+          # Build the Docker image
+          docker build -t "${ARTIFACTORY_IMAGE_PATH}" .
+
+          # The JFrog CLI uses the OIDC token to automatically configure Docker credentials
+          jf rt docker-push "${ARTIFACTORY_IMAGE_PATH}" "${ARTIFACTORY_DOCKER_REPO}"
