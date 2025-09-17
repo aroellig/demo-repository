@@ -25,7 +25,7 @@ jobs:
           # Define your repository and image names
           # Replace 'my-docker-repo' with your Artifactory Docker repository name
           # Replace 'my-app' with your desired image name
-          ARTIFACTORY_DOCKER_REPO="my-docker-repo"
+          ARTIFACTORY_DOCKER_REPO="docker-local"
           IMAGE_NAME="my-app"
           IMAGE_TAG="1.0.${{ github.run_number }}"
 
