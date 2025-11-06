@@ -1,44 +1,32 @@
-name: "Build and Push Docker Image with JFrog CLI"
-on: push
+name: oidc-poc
 
-permissions:
-  id-token: write
-  contents: read
+on:
+  push:
+    branches:
+      - '*'
 
 jobs:
-  build-and-push-docker:
+  auth:
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
-    # Define environment variables at the job level here
-    env:
-      JF_URL: "https://andrewrjpd1.jfrog.io"
-      # Replace 'my-docker-repo' with your Artifactory Docker repository name
-      ARTIFACTORY_DOCKER_REPO: "docker-local"
-      # Replace 'my-app' with your desired image name
-      IMAGE_NAME: "my-app"
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup JFrog CLI
+      - name: Set up JFrog CLI with OIDC
         uses: jfrog/setup-jfrog-cli@v4
-        # The JF_URL is now inherited from the job's env context
         with:
-          oidc-provider-name: github
+          oidc-provider-name: ashritha-cli
+          oidc-audience: ashritha-cli-Audience
+        env:
+          JF_URL: https://hts2.jfrog.io/artifactory
 
-      - name: Build and Push Docker Image
+      - name: Ping Artifactory
         run: |
-          # Define the image tag
-          IMAGE_TAG="1.0.${{ github.run_number }}"
-
-          # Construct the full image path using the hostname from JF_URL
-          # The shell command '${JF_URL#*//}' strips the 'https://' prefix
-          ARTIFACTORY_IMAGE_PATH="${JF_URL#*//}/${ARTIFACTORY_DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
-
-          echo "Building and pushing image to: ${ARTIFACTORY_IMAGE_PATH}"
-
-          # Build the Docker image
-          docker build -t "${ARTIFACTORY_IMAGE_PATH}" .
-
-          # Push the image to Artifactory
-          jf rt docker-push "${ARTIFACTORY_IMAGE_PATH}" "${ARTIFACTORY_DOCKER_REPO}"
+          jf rt ping
+      - name: Create dummy file
+        run: |
+          echo "This is a dummy file for testing upload" > dummy-file.txt
+          cat dummy-file.txt
+      - name: Upload dummy file to Artifactory
+        run: |
+          jf rt upload "dummy-file.txt" "<repo-name>/dummy-file.txt"
